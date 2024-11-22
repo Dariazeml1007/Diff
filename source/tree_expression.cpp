@@ -13,6 +13,7 @@
 Node * new_node (Info_t type, Node *left, Node *right, ...)
 {
 
+
     va_list factor;
     va_start(factor, right);
 
@@ -109,8 +110,6 @@ void print_tree (Node *node)
         }
     }
 
-
-
     if (node->right)
         print_tree(node->right);
 
@@ -127,24 +126,23 @@ void node_dtor (Node *node)
 {
     assert(node);
 
-    if (!is_leaf(node->right))
+    if (node->right)
+    {
+        if (!is_leaf(node->right))
+            node_dtor(node->right);
 
-        node_dtor(node->right);
+        else
+            free(node->right);
+    }
 
-    else
+    if (node->left)
+    {
+        if (!is_leaf(node->left))
+            node_dtor(node->left);
 
-        free(node->right);
-
-
-    if (!is_leaf(node->left))
-
-        node_dtor(node->left);
-
-    else
-
-        free(node->left);
-
-
+        else
+            free(node->left);
+    }
 
     free(node);
     return;
