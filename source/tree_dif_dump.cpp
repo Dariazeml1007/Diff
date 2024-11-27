@@ -48,43 +48,29 @@ void print_node_in_file (Node *node, FILE * pointer_file)
 
     if (is_leaf(node))
     {
-        if (node->type == NODE_TYPE_NUM)
+        if (node->value.type == NODE_TYPE_NUM)
              fprintf (pointer_file, "el_%p [shape=record, label= \"address = %p|"
-                                    "%f| addr_parent = %p\"];\n", &node->value, &node->value, *(double *)&node->value, node->parent);
+                                    "%f| addr_parent = %p\"];\n", &node->value, &node->value, node->value.data.number, node->parent);
 
-        else if (node->type == NODE_TYPE_VAR)
+        else if (node->value.type == NODE_TYPE_VAR)
             fprintf (pointer_file, "el_%p [shape=record, label= \"address = %p|"
-                                   "%c| addr_parent = %p\"];\n", &node->value, &node->value, *(char *)&node->value, node->parent);
+                                   "%c| addr_parent = %p\"];\n", &node->value, &node->value, node->value.data.variable, node->parent);
 
     }
 
     else
     {
-        switch (*(operation_t *)&node->value)
+
+        for (size_t i = 1; i < OPER_ARRAY_SIZE; i++)
         {
-            case OPERATION_ADD:
-                fprintf (pointer_file, "el_%p [shape=record, label= \"address = %p|"
-                                   "+ | addr_parent = %p\"];\n", &node->value, &node->value, node->parent);
-
-                break;
-            case OPERATION_SUB:
-                fprintf (pointer_file, "el_%p [shape=record, label= \"address = %p|"
-                                   "- | addr_parent = %p\"];\n", &node->value, &node->value, node->parent);
-
-                break;
-            case OPERATION_MUL:
+            if (node->value.data.operation == array_of_oper[i].operation)
+            {
                fprintf (pointer_file, "el_%p [shape=record, label= \"address = %p|"
-                                   "* | addr_parent = %p\"];\n", &node->value, &node->value, node->parent);
+                                   "%s| addr_parent = %p\"];\n", &node->value, &node->value, array_of_oper[i].str_operation, node->parent);
 
-                break;
-            case OPERATION_DIV:
-                fprintf (pointer_file, "el_%p [shape=record, label= \"address = %p|"
-                                   "/ | addr_parent = %p\"];\n", &node->value, &node->value, node->parent);
-
-                break;
-            default:
-                assert(0 && "no_such operation");
+            }
         }
+
     }
 
     if (node->left)

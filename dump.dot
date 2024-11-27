@@ -2,10 +2,8 @@ digraph structs {
 rankdir=HR;
 node[color= "#003A8C",style="filled", fillcolor="#B4FBFF", fontsize=14];
 edge[color="black", weight = 9,fontsize=14];
-el_010E1740 [shape=record, label= "address = 010E1740|+ | addr_parent = 00000000"];
-el_010E16F0 [shape=record, label= "address = 010E16F0|1.000000| addr_parent = 010E1738"];
-el_010E1718 [shape=record, label= "address = 010E1718|1.000000| addr_parent = 010E1738"];
-el_010E1740->el_010E16F0;
-el_010E1740->el_010E1718;
+el_00F615F0 [shape=record, label= "address = 00F615F0|cos| addr_parent = 00000000"];
+el_00F61640 [shape=record, label= "address = 00F61640|x| addr_parent = 00F615E0"];
+el_00F615F0->el_00F61640;
 
 }

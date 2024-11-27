@@ -10,20 +10,14 @@
 #include "tree_expression.h"
 #include "tree_dif_dump.h"
 
-Node * new_node (Info_t type, Node *left, Node *right, ...)
+Node * new_node (Node *left, Node *right, Node_value val)
 {
-
-
-    va_list factor;
-    va_start(factor, right);
 
     struct Node *node = (Node *) calloc (1, sizeof(Node));
     if (!node)
-        printf ("Allocation memory\n");
+        return NULL;
 
-    node->type = type;
-
-
+    node->value = val;
     node->right = right;
     node->left = left;
 
@@ -34,28 +28,25 @@ Node * new_node (Info_t type, Node *left, Node *right, ...)
         right->parent = node;
 
 
-    switch(type)
+    switch(node->value.type)
     {
         case NODE_TYPE_OPER:
         {
-            operation_t value = (operation_t) va_arg(factor, int);
-            *(operation_t *)&node->value = value;
+            node->value.data.operation = val.data.operation;
             break;
         }
 
         case NODE_TYPE_NUM:
         {
-            double value = (double) va_arg(factor, double);
-            *(double *)&node->value = value;
-            printf ("new_node_func value of num = %lf\n", value);
+            node->value.data.number = val.data.number;
+            printf ("new_node_func value of num = %lf\n", node->value.data.number);
             break;
         }
 
         case NODE_TYPE_VAR:
         {
-            char value = (char) va_arg(factor, int);
-            *(char *)&node->value = value;
-            printf ("new_node_func value of var = %c\n", value);
+            node->value.data.variable = val.data.variable;
+            printf ("new_node_func value of var = %c\n", node->value.data.variable);
             break;
         }
 
@@ -64,7 +55,6 @@ Node * new_node (Info_t type, Node *left, Node *right, ...)
 
     }
 
-    va_end(factor);
 
     return node;
 
@@ -84,30 +74,14 @@ void print_tree (Node *node)
 
     if (is_leaf(node))
     {
-        if (node->type == NODE_TYPE_NUM)
-            printf ("%f ", *(double *)&node->value);
-        else if (node->type == NODE_TYPE_VAR)
-            printf ("%c ", *(char *)&node->value);
+        if (node->value.type == NODE_TYPE_NUM)
+            printf ("%lf", node->value.data.number);
+        else if (node->value.type == NODE_TYPE_VAR)
+            printf ("%c ", node->value.data.variable);
     }
     else
     {
-        switch (*(operation_t *)&node->value)
-        {
-            case OPERATION_ADD:
-                printf ("+ ");
-                break;
-            case OPERATION_SUB:
-                printf ("- ");
-                break;
-            case OPERATION_MUL:
-                printf ("* ");
-                break;
-            case OPERATION_DIV:
-                printf ("/ ");
-                break;
-            default:
-                assert(0 && "no_such operation");
-        }
+        printf ("%s", array_of_oper[node->value.data.operation].str_operation);
     }
 
     if (node->right)
@@ -119,7 +93,7 @@ bool is_leaf(Node *node)
 {
     assert(node);
 
-    return !node->left || !node->right;
+    return !node->left && !node->right;
 }
 
 void node_dtor (Node *node)
@@ -132,7 +106,10 @@ void node_dtor (Node *node)
             node_dtor(node->right);
 
         else
+        {
             free(node->right);
+
+        }
     }
 
     if (node->left)
@@ -141,8 +118,13 @@ void node_dtor (Node *node)
             node_dtor(node->left);
 
         else
+        {
             free(node->left);
+
+        }
     }
+
+
 
     free(node);
     return;

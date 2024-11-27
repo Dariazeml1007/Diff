@@ -27,24 +27,59 @@ enum Info_t
 
 };
 
-struct Node
+enum operation_t
+{
+    OPERATION_UNKNOWN = 0,
+    OPERATION_ADD = 1,
+    OPERATION_SUB = 2,
+    OPERATION_MUL = 3,
+    OPERATION_DIV = 4,
+    OPERATION_SIN = 5,
+    OPERATION_COS = 6,
+    OPERATION_POWER = 7
+};
+
+struct Node_value
 {
     Info_t type;
-    uint64_t value;
+    union
+    {
+        double number;
+        operation_t operation;
+        char variable;
+
+    }data;
+};
+
+struct Node
+{
+
     Node *left;
     Node *right;
     Node *parent;
+    Node_value value;
 };
 
-enum operation_t
+struct oper_prototype
 {
-    OPERATION_ADD = 0,
-    OPERATION_SUB = 1,
-    OPERATION_MUL = 2,
-    OPERATION_DIV = 3
+    operation_t operation;
+    const char *str_operation;
 };
 
-Node *new_node (Info_t type, Node *right, Node *left, ...);
+static const oper_prototype array_of_oper[] =
+{
+    {OPERATION_UNKNOWN, ""/*EMPTY SPACE FOR ERRORS CHECKING*/},
+    {OPERATION_ADD, "+"},
+    {OPERATION_SUB, "-"},
+    {OPERATION_MUL, "*"},
+    {OPERATION_DIV, "/"},
+    {OPERATION_SIN, "sin"},
+    {OPERATION_COS, "cos"},
+    {OPERATION_POWER, "^"}
+};
+static const size_t OPER_ARRAY_SIZE = sizeof(array_of_oper)/sizeof(array_of_oper[0]);
+
+Node * new_node (Node *left, Node *right, Node_value val);
 void print_tree (Node *node);
 bool is_leaf(Node *node);
 void node_dtor (Node *node);

@@ -11,50 +11,73 @@
 #include "tree_dif_dump.h"
 #include "dif.h"
 
-#define _NUM(a) new_node(NODE_TYPE_NUM, NULL, NULL, a)//ADD
-#define _x new_node(NODE_TYPE_VAR, NULL, NULL,  'x' )//N_NODE
-#define _ADD(a, b) new_node( NODE_TYPE_OPER, a, b, OPERATION_ADD)
-#define _SUB(a, b) new_node(NODE_TYPE_OPER, a, b, OPERATION_SUB)
-#define _MUL(a, b) new_node(NODE_TYPE_OPER, a, b, OPERATION_MUL)
-#define _DIV(a, b) new_node(NODE_TYPE_OPER, a, b, OPERATION_DIV)
+
+Node* copy_subtree(Node *node);
+// #define VAR new_node(NODE_TYPE_VAR, NULL, NULL,  'x' )//N_NODE
+//{.type = NODE_TYPE_NUM},
+#define NUM(a) new_node(NULL, NULL, (struct Node_value){.type = NODE_TYPE_NUM, .data = {.number = a}})
+#define ADD(a, b) new_node(a, b, (struct Node_value){.type = NODE_TYPE_OPER, .data = {.operation = OPERATION_ADD}})
+#define SUB(a, b) new_node(a, b, (struct Node_value){.type = NODE_TYPE_OPER, .data = {.operation = OPERATION_SUB}})
+#define MUL(a, b) new_node(a, b, (struct Node_value){.type = NODE_TYPE_OPER, .data = {.operation = OPERATION_MUL}})
+#define DIV(a, b) new_node(a, b, (struct Node_value){.type = NODE_TYPE_OPER, .data = {.operation = OPERATION_DIV}})
+#define dL take_derivative(node->left)
+#define dR take_derivative(node->right)
+#define cL copy_subtree(node->left)
+#define cR copy_subtree(node->right)
+
+Node* copy_subtree(Node *node)
+{
+    if(node == NULL)
+        return NULL;
+
+    return new_node(copy_subtree(node->left), copy_subtree(node->right), node->value);
+}
 
 Node *take_derivative(Node *node)
 {
     assert(node);
 
-    switch (node->type)
+    switch (node->value.type)
     {
         case NODE_TYPE_NUM:
         {
-            return _NUM(double(0));;
+            return NUM(0); //NUM(0)
         }
         case NODE_TYPE_VAR:
         {
-            return _NUM(double(1));
+            printf ("dif var\n");
+            return NUM(1);
         }
         case NODE_TYPE_OPER:
         {
-            switch (node->value)
+            switch (node->value.data.operation)
             {
                 case OPERATION_ADD:
                 {
-                    Node *dL = take_derivative(node->left);
-                    Node *dR = take_derivative(node->right);
-                    return _ADD(dL, dR);
-
+                    return ADD(dL, dR);
                 }
                 case OPERATION_SUB:
                 {
-                    Node *dL = take_derivative(node->left);
-                    Node *dR = take_derivative(node->right);
-                    return _SUB(dL, dR);
-
+                    return SUB(dL, dR);
+                }
+                case OPERATION_MUL:
+                {
+                    return ADD(MUL(dL, cR), MUL(dR, cL));
+                }
+                case OPERATION_DIV:
+                {
+                    return DIV (SUB(MUL(dL, cR), MUL(dR, cL)), MUL(cR, cR)) ;
+                }
+                case OPERATION_UNKNOWN :
+                {
+                    assert(0 && "unknown  operation");
                 }
                 default :
                     assert(0 && "not correct operation");
 
             }
         }
+
         default :
             assert(0 && "not correct type");
 
@@ -62,9 +85,10 @@ Node *take_derivative(Node *node)
     return NULL;
 }
 
-#undef _NUM
-#undef _x
-#undef _ADD
-#undef _SUB
-#undef _MUL
-#undef _DIV
+#undef NUM
+#undef ADD
+#undef SUB
+#undef MUL
+#undef DIV
+
+// #undef VAR

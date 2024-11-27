@@ -20,29 +20,29 @@ int main()
     //     assert(0 && "NULL pointer\n");
     //struct Node *result = new_node(NODE_TYPE_OPER,(new_node(NODE_TYPE_NUM, NULL, NULL, double(5))), new_node(NODE_TYPE_NUM, NULL, NULL, num), OPERATION_ADD);
 
-    const char *s ="((x)+(x))";
+    const char *s ="(cos(x))";
     int index = 0;
     Node *result = read_from_string(root, s, &index);
     if (!result)
         assert(0 && "NULL pointer\n");
-
+    //printf ("%c", result->value.variable);
     print_tree(result);
 
     dump(result, "dump.dot");
-    printf("%d\n", result->type);
-
-    Node *dif_result = take_derivative(result);
-    if (!dif_result)
-        assert(0 && "NULL pointer\n");
 
 
-    print_tree(dif_result);
-    printf("\n");
-
-    dump(dif_result, "dump.dot");
+//     Node *dif_result = take_derivative(result);
+//     if (!dif_result)
+//         assert(0 && "NULL pointer\n");
+//
+//
+//     print_tree(dif_result);
+//     printf("\n");
+//     dump(dif_result, "dump.dot");
     system("dot dump.dot -Tpng -o tree.png");
 
     node_dtor(result);
 
-    node_dtor(dif_result);
+    //node_dtor(dif_result);
 }
+
