@@ -36,7 +36,8 @@ enum operation_t
     OPERATION_DIV = 4,
     OPERATION_SIN = 5,
     OPERATION_COS = 6,
-    OPERATION_POWER = 7
+    OPERATION_POWER = 7,
+    OPERATION_LN = 8
 };
 
 struct Node_value
@@ -75,7 +76,8 @@ static const oper_prototype array_of_oper[] =
     {OPERATION_DIV, "/"},
     {OPERATION_SIN, "sin"},
     {OPERATION_COS, "cos"},
-    {OPERATION_POWER, "^"}
+    {OPERATION_POWER, "^"},
+    {OPERATION_LN, "ln"}
 };
 static const size_t OPER_ARRAY_SIZE = sizeof(array_of_oper)/sizeof(array_of_oper[0]);
 
@@ -83,6 +85,7 @@ Node * new_node (Node *left, Node *right, Node_value val);
 void print_tree (Node *node);
 bool is_leaf(Node *node);
 void node_dtor (Node *node);
+void draw_and_show (Node *node);
 
 
 #endif

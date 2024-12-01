@@ -10,39 +10,34 @@
 #include "tree_dif_dump.h"
 #include "read_expression.h"
 #include "dif.h"
+#include "simplify.h"
+
 
 int main()
 {
-    //double num = 5;
     struct Node *root = {};
-    // printf ("%p\n", root);
-    // if (!root)
-    //     assert(0 && "NULL pointer\n");
-    //struct Node *result = new_node(NODE_TYPE_OPER,(new_node(NODE_TYPE_NUM, NULL, NULL, double(5))), new_node(NODE_TYPE_NUM, NULL, NULL, num), OPERATION_ADD);
 
-    const char *s ="(cos(x))";
+    const char *s ="(cos(((7)+(5))+((2)*(x))))";
     int index = 0;
     Node *result = read_from_string(root, s, &index);
     if (!result)
         assert(0 && "NULL pointer\n");
-    //printf ("%c", result->value.variable);
-    print_tree(result);
 
-    dump(result, "dump.dot");
+    draw_and_show(result);
+
+     result = optimize(result);
+     draw_and_show(result);
+    Node *dif_result = take_derivative(result);
+    if (!dif_result)
+        assert(0 && "NULL pointer\n");
 
 
-//     Node *dif_result = take_derivative(result);
-//     if (!dif_result)
-//         assert(0 && "NULL pointer\n");
-//
-//
-//     print_tree(dif_result);
-//     printf("\n");
-//     dump(dif_result, "dump.dot");
-    system("dot dump.dot -Tpng -o tree.png");
+    draw_and_show(dif_result);
+    dif_result = optimize(dif_result);
 
+    draw_and_show(dif_result);
     node_dtor(result);
-
-    //node_dtor(dif_result);
+    node_dtor(dif_result);
 }
+
 

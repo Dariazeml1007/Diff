@@ -21,10 +21,12 @@ int dump (Node *node, const char *name_of_dump_file)
     if (!pointer_file)
         return DIF_FILE_NOT_OPENED;
 
-    fprintf (pointer_file,  "digraph structs {\n"
-                            "rankdir=HR;\n"
-                            "node[color= \"#003A8C\",style=\"filled\", fillcolor=\"#B4FBFF\", fontsize=14];\n"
-                            "edge[color=\"black\", weight = 9,fontsize=14];\n");
+    fprintf (pointer_file,  "digraph structs\n"
+                            "{\n"
+                            "\trankdir=HR;\n"
+                            "\tnode[color= \"#003A8C\",style=\"filled\", fillcolor=\"#B4FBFF\", fontsize=14];\n"
+                            "\tedge[color=\"black\", weight = 9,fontsize=14];"
+                            "\n");
 
     print_node_in_file(node, pointer_file);
     print_edge_in_file(node, pointer_file);
@@ -49,25 +51,23 @@ void print_node_in_file (Node *node, FILE * pointer_file)
     if (is_leaf(node))
     {
         if (node->value.type == NODE_TYPE_NUM)
-             fprintf (pointer_file, "el_%p [shape=record, label= \"address = %p|"
-                                    "%f| addr_parent = %p\"];\n", &node->value, &node->value, node->value.data.number, node->parent);
+             fprintf (pointer_file, "\tel_%p [shape=record, label= \"address = %p|"
+                                    "%f| addr_parent = %p\"];\n", node, node, node->value.data.number, node->parent);
 
         else if (node->value.type == NODE_TYPE_VAR)
-            fprintf (pointer_file, "el_%p [shape=record, label= \"address = %p|"
-                                   "%c| addr_parent = %p\"];\n", &node->value, &node->value, node->value.data.variable, node->parent);
+            fprintf (pointer_file, "\tel_%p [shape=record, label= \"address = %p|"
+                                   "%c| addr_parent = %p\"];\n", node, node, node->value.data.variable, node->parent);
 
     }
 
     else
     {
-
         for (size_t i = 1; i < OPER_ARRAY_SIZE; i++)
         {
             if (node->value.data.operation == array_of_oper[i].operation)
             {
-               fprintf (pointer_file, "el_%p [shape=record, label= \"address = %p|"
-                                   "%s| addr_parent = %p\"];\n", &node->value, &node->value, array_of_oper[i].str_operation, node->parent);
-
+               fprintf (pointer_file, "\tel_%p [shape=record, label= \"addr_left = %p | address = %p|"
+                                   "%s| addr_parent = %p | addr_right = %p\"];\n", node, node->left, node, array_of_oper[i].str_operation, node->parent, node->right);
             }
         }
 
@@ -90,16 +90,16 @@ void print_edge_in_file (Node *node, FILE * pointer_file)
 
     if (node->left)
     {
-        fprintf (pointer_file, "el_%p", &node->value);
+        fprintf (pointer_file, "\tel_%p", node);
         fprintf (pointer_file, "->");
-        fprintf (pointer_file, "el_%p;\n", &node->left->value);
+        fprintf (pointer_file, "el_%p;\n", node->left);
         print_edge_in_file(node->left, pointer_file);
     }
     if (node->right)
     {
-        fprintf (pointer_file, "el_%p", &node->value);
+        fprintf (pointer_file, "\tel_%p", node);
         fprintf (pointer_file, "->");
-        fprintf (pointer_file, "el_%p;\n", &node->right->value);
+        fprintf (pointer_file, "el_%p;\n", node->right);
         print_edge_in_file(node->right, pointer_file);
     }
 }

@@ -6,28 +6,17 @@
 #include <stdbool.h>
 #include <sys\stat.h>
 #include <stdarg.h>
+#include <math.h>
 
 #include "tree_expression.h"
 #include "tree_dif_dump.h"
+#include "read_expression.h"
 #include "dif.h"
-
-
-Node* copy_subtree(Node *node);
-// #define VAR new_node(NODE_TYPE_VAR, NULL, NULL,  'x' )//N_NODE
-//{.type = NODE_TYPE_NUM},
-#define NUM(a) new_node(NULL, NULL, (struct Node_value){.type = NODE_TYPE_NUM, .data = {.number = a}})
-#define ADD(a, b) new_node(a, b, (struct Node_value){.type = NODE_TYPE_OPER, .data = {.operation = OPERATION_ADD}})
-#define SUB(a, b) new_node(a, b, (struct Node_value){.type = NODE_TYPE_OPER, .data = {.operation = OPERATION_SUB}})
-#define MUL(a, b) new_node(a, b, (struct Node_value){.type = NODE_TYPE_OPER, .data = {.operation = OPERATION_MUL}})
-#define DIV(a, b) new_node(a, b, (struct Node_value){.type = NODE_TYPE_OPER, .data = {.operation = OPERATION_DIV}})
-#define dL take_derivative(node->left)
-#define dR take_derivative(node->right)
-#define cL copy_subtree(node->left)
-#define cR copy_subtree(node->right)
+#include "simplify.h"
 
 Node* copy_subtree(Node *node)
 {
-    if(node == NULL)
+    if (node == NULL)
         return NULL;
 
     return new_node(copy_subtree(node->left), copy_subtree(node->right), node->value);
@@ -41,11 +30,10 @@ Node *take_derivative(Node *node)
     {
         case NODE_TYPE_NUM:
         {
-            return NUM(0); //NUM(0)
+            return NUM(0);
         }
         case NODE_TYPE_VAR:
         {
-            printf ("dif var\n");
             return NUM(1);
         }
         case NODE_TYPE_OPER:
@@ -68,10 +56,28 @@ Node *take_derivative(Node *node)
                 {
                     return DIV (SUB(MUL(dL, cR), MUL(dR, cL)), MUL(cR, cR)) ;
                 }
-                case OPERATION_UNKNOWN :
+                case OPERATION_POWER:
                 {
-                    assert(0 && "unknown  operation");
+                    bool left = is_var_in_node(node->left);
+                    bool right = is_var_in_node(node->right);
+                    if (left && !right)
+                    {
+                        return MUL(cR, MUL(POW(cL, SUB(cR, NUM(1))), dL));
+                    }
                 }
+                case OPERATION_SIN:
+                {
+                    return MUL(COS(cR), dR);
+                }
+                case OPERATION_COS:
+                {
+                    return MUL(MUL(NUM(-1), SIN(cR)), dR);
+                }
+                case OPERATION_LN:
+                {
+                    return MUL(DIV(NUM(1), cR), dR);
+                }
+                case OPERATION_UNKNOWN :
                 default :
                     assert(0 && "not correct operation");
 
@@ -85,10 +91,21 @@ Node *take_derivative(Node *node)
     return NULL;
 }
 
-#undef NUM
-#undef ADD
-#undef SUB
-#undef MUL
-#undef DIV
 
-// #undef VAR
+bool is_var_in_node (Node *node)
+{
+    assert(node);
+
+    if (is_leaf(node))
+    {
+        if (node->value.type == NODE_TYPE_VAR)
+        {
+            return true;
+        }
+        else
+            return false;
+    }
+    return  (node->left && is_var_in_node(node->left)) ||
+            (node->right && is_var_in_node(node->right));
+}
+
