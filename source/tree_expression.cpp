@@ -53,7 +53,7 @@ void print_tree (Node *node)
                 printf ("%lf", node->value.data.number);
         }
         else if (node->value.type == NODE_TYPE_VAR)
-            printf ("%c", node->value.data.variable);
+            printf ("%s", node->value.data.variable);
     }
     else
     {

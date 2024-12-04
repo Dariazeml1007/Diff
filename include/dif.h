@@ -12,7 +12,7 @@
 #define POW(a, b) new_node(a, b, (struct Node_value){.type = NODE_TYPE_OPER, .data = {.operation = OPERATION_POWER}})
 #define SIN(a) new_node(NULL, a, (struct Node_value){.type = NODE_TYPE_OPER, .data = {.operation = OPERATION_SIN}})
 #define COS(a) new_node(NULL, a, (struct Node_value){.type = NODE_TYPE_OPER, .data = {.operation = OPERATION_COS}})
-#define VAR(x) new_node(NULL, NULL, (struct Node_value){.type = NODE_TYPE_VAR, .data = {.variable = 'x'}})
+//#define VAR(x) new_node(NULL, NULL, (struct Node_value){.type = NODE_TYPE_VAR, .data = {.variable = "x"}})
 
 
 #define dL take_derivative(node->left)

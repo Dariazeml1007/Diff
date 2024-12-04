@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 
+const size_t size_of_var = 16;
 
 typedef enum
 {
@@ -37,7 +38,11 @@ enum operation_t
     OPERATION_SIN = 5,
     OPERATION_COS = 6,
     OPERATION_POWER = 7,
-    OPERATION_LN = 8
+    OPERATION_LN = 8,
+    OPERATION_OPEN_BRACKET = 9,
+    OPERATION_CLOSE_BRACKET = 10
+
+
 };
 
 struct Node_value
@@ -47,7 +52,7 @@ struct Node_value
     {
         double number;
         operation_t operation;
-        char variable;
+        char variable[size_of_var];
 
     }data;
 };
@@ -77,7 +82,9 @@ static const oper_prototype array_of_oper[] =
     {OPERATION_SIN, "sin"},
     {OPERATION_COS, "cos"},
     {OPERATION_POWER, "^"},
-    {OPERATION_LN, "ln"}
+    {OPERATION_LN, "ln"},
+    {OPERATION_OPEN_BRACKET, "("},
+    {OPERATION_CLOSE_BRACKET, ")"}
 };
 static const size_t OPER_ARRAY_SIZE = sizeof(array_of_oper)/sizeof(array_of_oper[0]);
 

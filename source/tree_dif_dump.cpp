@@ -56,7 +56,7 @@ void print_node_in_file (Node *node, FILE * pointer_file)
 
         else if (node->value.type == NODE_TYPE_VAR)
             fprintf (pointer_file, "\tel_%p [shape=record, label= \"address = %p|"
-                                   "%c| addr_parent = %p\"];\n", node, node, node->value.data.variable, node->parent);
+                                   "%s| addr_parent = %p\"];\n", node, node, node->value.data.variable, node->parent);
 
     }
 

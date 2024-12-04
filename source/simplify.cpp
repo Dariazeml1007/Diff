@@ -89,7 +89,6 @@ Node *simplifier_constants(Node *node)
     if (is_leaf(node))
         return node;
 
-
     if (node->left)
     {
         if (!is_var_in_node(node->left))
@@ -128,7 +127,7 @@ Node *opt_add (Node *node)
     Node *old_node = node;
     if (node_is_zero(node->left))
     {
-        free(old_node);
+        free(old_node);//////dtor
         return copy_subtree(node->right);
     }
     if (node_is_zero(node->right))
@@ -204,6 +203,8 @@ Node *opt_pow (Node *node)
 
 Node *calculate (Node *node)
 {
+    assert(node);
+
     Node *old_node = node;
 
     switch (node->value.type)
@@ -213,7 +214,7 @@ Node *calculate (Node *node)
             node = copy_subtree(node);
             break;
         }
-        case NODE_TYPE_OPER:
+        case NODE_TYPE_OPER://func
         {
             switch(node->value.data.operation)
             {

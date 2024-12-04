@@ -52,14 +52,6 @@ Node *read_from_string (Node *node, const char *expression, int *index)
 
         return new_node_;
     }
-    else if (expression[*index] == 'x')
-    {
-        new_node_ = VAR(x);
-
-        skip_until_bracket (expression, index);
-
-        return new_node_;
-    }
     else
     {
         Node_value val = {};
@@ -71,6 +63,13 @@ Node *read_from_string (Node *node, const char *expression, int *index)
         sscanf(expression + (*index), "%[^\n)( ]", oper_str);
 
         new_node_= get_operation(node, new_node_, oper_str);
+
+        if (new_node_->value.type == NODE_TYPE_VAR)
+        {
+            skip_until_bracket (expression, index);
+
+            return new_node_;
+        }
 
         (*index) += strlen(oper_str);
         if (expression[(*index)] == '(')
@@ -105,8 +104,8 @@ Node *get_operation(Node *node, Node *new_node_, char *oper_str)
 
     if (new_node_->value.data.operation == OPERATION_UNKNOWN)
     {
-        printf ("Unknown operation\n");
-        return NULL;
+        new_node_->value.type = NODE_TYPE_VAR;
+        strcpy(new_node_->value.data.variable, oper_str);
     }
     return new_node_;
 }
