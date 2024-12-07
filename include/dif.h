@@ -15,14 +15,15 @@
 //#define VAR(x) new_node(NULL, NULL, (struct Node_value){.type = NODE_TYPE_VAR, .data = {.variable = "x"}})
 
 
-#define dL take_derivative(node->left)
-#define dR take_derivative(node->right)
+#define dL take_derivative(node->left,  p_file)//p_file
+#define dR take_derivative(node->right, p_file)
 #define cL copy_subtree(node->left)
 #define cR copy_subtree(node->right)
 
-Node *take_derivative(Node *node);
+Node *take_derivative(Node *node, FILE*p_file);
 bool is_var_in_node (Node *node);
 Node* copy_subtree(Node *node);
+Node *process_str (Node *root);
 
 #endif
 

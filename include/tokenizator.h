@@ -3,6 +3,7 @@
 
 #include "tree_expression.h"
 
-Node *token (char *str);
+Node *token (const char *str);
+void print_token (Node *node, size_t size);
 
 #endif

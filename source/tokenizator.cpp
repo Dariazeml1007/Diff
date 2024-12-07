@@ -14,9 +14,9 @@
 const size_t SIZE_OF_OPER = 16;
 
 operation_t get_op (char *oper_str);
-double get_num (char *str, int *index);
+double get_num (const char *str, int *index);
 
-Node *token (char *str)
+Node *token (const char *str)
 {
     assert(str);
 
@@ -32,15 +32,11 @@ Node *token (char *str)
     {
         if (isdigit(str[index]))
         {
-
             array[jndex].value.data.number = get_num(str, &index);
             array[jndex++].value.type = NODE_TYPE_NUM;
-
-
         }
         else if (isalpha(str[index]))
         {
-
             char oper_str[SIZE_OF_OPER] = "";
             int kndex = 0;
             while (isalpha(str[index]))
@@ -60,11 +56,9 @@ Node *token (char *str)
                 strcpy(array[jndex].value.data.variable, oper_str);
                 array[jndex++].value.type = NODE_TYPE_VAR;
             }
-
         }
         else
         {
-
             char symbol_oper[2] = {str[index++], '\0'};
             operation_t oper = get_op(symbol_oper);
             if (oper != OPERATION_UNKNOWN)
@@ -79,6 +73,9 @@ Node *token (char *str)
         }
 
     }
+    array[jndex].value.data.operation = OPERATION_END;
+    array[jndex++].value.type = NODE_TYPE_OPER;
+
     return array;
 }
 
@@ -98,7 +95,7 @@ operation_t get_op (char *oper_str)
     return name_of_oper;
 }
 
-double get_num (char *str, int *index)
+double get_num (const char *str, int *index)
 {
     assert(str);
     assert(index);
@@ -122,4 +119,25 @@ double get_num (char *str, int *index)
         }
     }
     return num;
+}
+
+void print_token (Node *node, size_t size)
+{
+    for (size_t i = 0; i < size - 1; i++)
+    {
+        if (node[i].value.type == NODE_TYPE_NUM)
+            printf ("%lf", node[i].value.data.number);
+        else if (node[i].value.type == NODE_TYPE_VAR)
+            printf("%s", node[i].value.data.variable);
+        else
+        {
+            for (size_t j = 1; j < OPER_ARRAY_SIZE; j++)
+            {
+                if (node[i].value.data.operation == array_of_oper[j].operation)
+                {
+                    printf("%s", array_of_oper[j].str_operation);
+                }
+            }
+        }
+    }
 }

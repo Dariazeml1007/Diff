@@ -1,0 +1,42 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[russian]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\title{Взятие производной}
+\author{Daria Zemlianaia}
+\date{December 2024}
+\begin{document}
+\maketitle
+\section{Пример}
+Сегодня разберем ооооочень тяжелую задачу : $$1.000000+x+sin(x)$$
+Разобьем наш пример на части и продифференцируем
+
+Возьмем производную от суммы
+$$f(x) = 1.000000+x+sin(x)$$
+
+Возьмем производную от синуса
+$$f(x) = sin(x)$$
+
+Возьмем производную от переменной
+$$f(x) = x$$
+Получим :
+$$f'(x) = 1.000000$$
+
+Возьмем производную от суммы
+$$f(x) = 1.000000+x$$
+
+Возьмем производную от переменной
+$$f(x) = x$$
+Получим :
+$$f'(x) = 1.000000$$
+
+Возьмем производную от константы
+$$f(x) = 1.000000$$
+Получим :
+$$f'(x) = 0.000000$$
+Такой итог : 
+$$f'(x) = 1.000000+cos(x)$$
+\end{document}

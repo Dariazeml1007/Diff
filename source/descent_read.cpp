@@ -10,83 +10,139 @@
 #include "dif.h"
 #include "tree_expression.h"
 
-Node *GetG(char *s, int *p)
+Node *GetG(Node *root, int *index)
 {
-    Node *val = GetE(s, p);
-    if (s[*p] != '$')
-        SyntaxError(p);
-    (*p)++;
+    Node *val = GetE(root, index);
+    if (root[*index].value.data.operation != OPERATION_END)
+        SyntaxError(index);
+    (*index)++;
     return val;
 }
 
-Node * GetE(char *s, int *p)
+Node * GetE(Node *root, int *index)
 {
-    Node *val = GetT(s, p);
-    while (s[*p] == '+' || s[*p] =='-')
+    Node *val = GetT(root, index);
+    while (root[*index].value.data.operation == OPERATION_ADD || root[*index].value.data.operation == OPERATION_SUB)
     {
-        int op = s[*p];
-        (*p)++;
-        Node * val2 = GetT(s, p);
-        if (op == '+')
-            val = ADD(val, val2);
-        else
-            val = SUB(val, val2);
+        Node *old = val;
+        val = root + *index;
+
+        old->parent = val;
+        val->left = old;
+        (*index)++;
+
+        val->right = GetT(root, index);
+        val->right->parent = val;
     }
     return val;
 }
-Node * GetP (char *s, int *p)
+
+Node * GetT(Node *root, int *index)
 {
-    if (s[*p] == '(')
+    Node *val = GetPow(root, index);
+    while (root[*index].value.data.operation == OPERATION_MUL || root[*index].value.data.operation == OPERATION_DIV)
     {
-        (*p)++;
-        Node * val = GetE(s, p);
-        if (s[*p] != ')')
-            SyntaxError(p);
-        (*p)++;
+        Node *old = val;
+        val = root + *index;
+
+        val->left = old;
+        val->left->parent = val;
+        (*index)++;
+
+        val->right = GetPow(root, index);
+        val->right->parent = val;
+    }
+    return val;
+}
+
+Node *GetPow (Node *root, int *index)
+{
+    Node *val = GetP(root, index);
+    while (root[*index].value.data.operation == OPERATION_POWER)
+    {
+        Node *old = val;
+        val = root + *index;
+
+        val->left = old;
+        val->left->parent = val;
+        (*index)++;
+
+        val->right = GetP(root, index);
+        val->right->parent = val;
+    }
+    return val;
+}
+
+Node * GetP (Node *root, int *index)
+{
+    if (root[*index].value.data.operation == OPERATION_OPEN_BRACKET)
+    {
+        (*index)++;
+        Node * val = GetE(root, index);
+        if (root[*index].value.data.operation != OPERATION_CLOSE_BRACKET)
+            SyntaxError(index);
+        (*index)++;
         return val;
-
     }
-    // else if (s[*p] == 'x')
-    // {
-    //     (*p)++;
-    //     return VAR(x);
-    // }
-    else
-        return GetN(s, p);
+
+    if (root[*index].value.type == NODE_TYPE_NUM)
+        return GetN(root, index);
+    if (root[*index].value.type == NODE_TYPE_VAR)
+        return GetVar(root, index);
+    if (root[*index].value.type == NODE_TYPE_OPER)
+        return GetOp(root, index);
+
+    SyntaxError(index);
+    return NULL;
 }
 
-Node * GetN(char *s, int *p)
+Node *GetOp (Node *root, int *index)
 {
-    double val = 0;
-    int old_p = *p;
 
-    while ('0' <= s[*p] && s[*p] <= '9')
+    if (root[*index].value.type != NODE_TYPE_OPER)
+        SyntaxError(index);
+
+    Node *res = root + *index;
+    (*index)++;
+
+    if (root[*index].value.data.operation == OPERATION_OPEN_BRACKET)
     {
-        val = val * 10 + s[*p] - '0';
-        (*p)++;
+        (*index)++;
+
+        res->right = GetE(root, index);
+        res->right->parent= res;
+
+        if (root[*index].value.data.operation != OPERATION_CLOSE_BRACKET)
+            SyntaxError(index);
+        (*index)++;
+        return res;
     }
-    if (old_p == *p)
-    {
-        SyntaxError(p);
-    }
-    return NUM(val);
+    SyntaxError(index);
+    return NULL;
 }
 
-Node * GetT(char *s, int *p)
+Node * GetVar(Node *root, int *index)
 {
-    Node *val = GetP(s, p);
-    while (s[*p] == '*' || s[*p] =='/')
-    {
-        int op = s[*p];
-        (*p)++;
-        Node* val2 = GetP(s, p);
-        if (op == '*')
-            val = MUL(val, val2);
-        else
-            val = DIV(val, val2);
-    }
-    return val;
+
+    if (root[*index].value.type != NODE_TYPE_VAR)
+        SyntaxError(index);
+    Node *res = root + *index;
+    (*index)++;
+    return res;
 }
+
+
+
+Node * GetN(Node *root, int *index)
+{
+
+    if (root[*index].value.type != NODE_TYPE_NUM)
+        SyntaxError(index);
+    Node *res = root + *index;
+    (*index)++;
+    return res;
+}
+
 
 void SyntaxError(int *p)
 {

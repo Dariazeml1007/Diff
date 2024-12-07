@@ -18,7 +18,8 @@ Node *opt_mul (Node *node);
 Node *opt_pow (Node *node);
 Node *simplifier_operations(Node *node);
 Node *simplifier_constants(Node *node);
-Node *calculate (Node *node);
+double calculate (Node *node);
+double oper_calc(Node *node);
 
 bool is_zero (double a);
 bool node_is_one (Node *node);
@@ -53,6 +54,56 @@ Node *optimize (Node *node)
     return node;
 }
 
+Node *simplifier_constants(Node *node)
+{
+    assert(node);
+
+
+    if (is_leaf(node))
+        return node;
+
+    if (node->left)
+    {
+        if (!is_var_in_node(node->left))
+        {
+            Node *old_left = node->left;
+            node->left = NUM(calculate (node->left));
+            node->left->parent = node;
+            node_dtor(old_left);
+        }
+        else
+        {
+            node->left = optimize(node->left);
+            node->left->parent = node;
+        }
+    }
+    if (node->right)
+    {
+        if (!is_var_in_node(node->right))
+        {
+            Node *old_right = node->right;
+            node->right = NUM(calculate (node->right));
+
+            node->right->parent = node;
+            node_dtor(old_right);
+        }
+        else
+        {
+            node->right = optimize(node->right);
+            node->right->parent = node;
+        }
+    }
+    if (node->right && node->left)
+        if (!is_var_in_node(node->left) && !is_var_in_node(node->right))
+        {
+            Node *old_node = node;
+            node = NUM(calculate(node));
+            node_dtor(old_node);
+        }
+
+    return node;
+}
+
 Node *simplifier_operations(Node *node)
 {
     assert(node);
@@ -82,58 +133,20 @@ Node *simplifier_operations(Node *node)
     return node;
 }
 
-Node *simplifier_constants(Node *node)
-{
-    assert(node);
-
-    if (is_leaf(node))
-        return node;
-
-    if (node->left)
-    {
-        if (!is_var_in_node(node->left))
-        {
-            node->left = calculate (node->left);
-        }
-        else
-        {
-            node->left = optimize(node->left);
-        }
-    }
-    if (node->right)
-    {
-        if (!is_var_in_node(node->right))
-        {
-            node->right = calculate (node->right);
-        }
-        else
-        {
-            node->right = optimize(node->right);
-        }
-    }
-    if (node->right && node->left)
-        if (!is_var_in_node(node->left) && !is_var_in_node(node->right))
-        {
-            return calculate(node);
-        }
-
-    return node;
-}
-
 Node *opt_add (Node *node)
 {
     assert (node);
-
     Node *old_node = node;
+
     if (node_is_zero(node->left))
     {
-        free(old_node);//////dtor
-        return copy_subtree(node->right);
+        node = copy_subtree(node->right);
+        node_dtor(old_node);
     }
     if (node_is_zero(node->right))
     {
-        free(old_node);
-        return copy_subtree(node->left);
+        node = copy_subtree(node->left);
+        node_dtor(old_node);
     }
 
     return node;
@@ -143,28 +156,28 @@ Node *opt_add (Node *node)
 Node *opt_mul (Node *node)
 {
     assert (node);
-
     Node *old_node = node;
+
     if (node_is_one(node->left))
     {
         node = copy_subtree(node->right);
-        free(old_node);
+        node_dtor(old_node);
     }
     else if (node_is_zero(node->left))
     {
         node = NUM(0);
-        free(old_node);
+        node_dtor(old_node);
     }
-
+    Node *old_node_ = node;
     if (node_is_one(node->right))
     {
         node = copy_subtree(node->left);
-        free(old_node);
+        node_dtor(old_node_);
     }
     else if(node_is_zero(node->right))
     {
         node = NUM(0);
-        free(old_node);
+        node_dtor(old_node_);
     }
 
     return node;
@@ -179,99 +192,98 @@ Node *opt_pow (Node *node)
     if (node_is_one(node->left))
     {
         node = copy_subtree(node->left);
-        free(old_node);
+        node_dtor(old_node);
     }
     else if (node_is_zero(node->left))
     {
         node = NUM(0);
-        free(old_node);
+        node_dtor(old_node);
     }
-
+    Node *old_node_ = node;
     if (node_is_one(node->right))
     {
         node = copy_subtree(node->left);
-        free(old_node);
+        node_dtor(old_node_);
     }
     else if(node_is_zero(node->right))
     {
         node = NUM(1);
-        free(old_node);
+        node_dtor(old_node_);
     }
 
     return node;
 }
 
-Node *calculate (Node *node)
+double calculate (Node *node)
 {
     assert(node);
-
-    Node *old_node = node;
 
     switch (node->value.type)
     {
         case NODE_TYPE_NUM:
         {
-            node = copy_subtree(node);
-            break;
+            return node->value.data.number;
         }
-        case NODE_TYPE_OPER://func
+        case NODE_TYPE_OPER:
         {
-            switch(node->value.data.operation)
-            {
-                case OPERATION_ADD:
-                {
-                    node = NUM((calculate(node->left))->value.data.number + (calculate(node->right))->value.data.number);
-                    break;
-                }
-                case OPERATION_SUB:
-                {
-                    node = NUM(calculate(node->left)->value.data.number - calculate(node->right)->value.data.number);
-                    break;
-                }
-                case OPERATION_MUL:
-                {
-                    node = NUM(calculate(node->left)->value.data.number * calculate(node->right)->value.data.number);
-                    break;
-                }
-                case OPERATION_DIV:
-                {
-                    node = NUM(calculate(node->left)->value.data.number / calculate(node->right)->value.data.number);
-                    break;
-                }
-                case OPERATION_POWER:
-                {
-                    node = NUM(pow(calculate(node->left)->value.data.number, calculate(node->right)->value.data.number));
-                    break;
-                }
-                case OPERATION_SIN:
-                {
-                    node = NUM(sin(calculate(node->right)->value.data.number));
-                    break;
-                }
-                case OPERATION_COS:
-                {
-                    node = NUM(cos(calculate(node->right)->value.data.number));
-                    break;
-                }
-                case OPERATION_LN:
-                {
-                    node = NUM(log(calculate(node->right)->value.data.number));
-                    break;
-                }
-                case OPERATION_UNKNOWN:
-                    assert(0 && "unknown oper");
-                default:
-                    assert(0 && "wrong oper");
-            }
-            break;
+            return oper_calc(node);
         }
         case NODE_TYPE_VAR:
             assert(0 && "type var can not be here");
         default:
-             assert(0 && "wrong type");
+            assert(0 && "wrong type");
     }
-    free(old_node);
-    return node;
+
+    return NAN;
 }
 
 
+double oper_calc(Node *node)
+{
+    assert(node);
+
+    switch(node->value.data.operation)
+    {
+        case OPERATION_ADD:
+        {
+            return calculate(node->left) + calculate(node->right);
+        }
+        case OPERATION_SUB:
+        {
+            return calculate(node->left) - calculate(node->right);
+        }
+        case OPERATION_MUL:
+        {
+            return calculate(node->left) * calculate(node->right);
+        }
+        case OPERATION_DIV:
+        {
+            return calculate(node->left)/ calculate(node->right);
+        }
+        case OPERATION_POWER:
+        {
+           return pow(calculate(node->left), calculate(node->right));
+        }
+        case OPERATION_SIN:
+        {
+            return sin(calculate(node->right));
+        }
+        case OPERATION_COS:
+        {
+            return cos(calculate(node->right));
+        }
+        case OPERATION_LN:
+        {
+            return log(calculate(node->right));
+        }
+        case OPERATION_OPEN_BRACKET:
+        case OPERATION_CLOSE_BRACKET:
+        case OPERATION_END:
+        case OPERATION_UNKNOWN:
+            assert(0 && "unknown oper");
+        default:
+            assert(0 && "wrong oper");
+    }
+
+    return NAN;
+}

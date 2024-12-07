@@ -40,7 +40,8 @@ enum operation_t
     OPERATION_POWER = 7,
     OPERATION_LN = 8,
     OPERATION_OPEN_BRACKET = 9,
-    OPERATION_CLOSE_BRACKET = 10
+    OPERATION_CLOSE_BRACKET = 10,
+    OPERATION_END = 11
 
 
 };
@@ -84,7 +85,8 @@ static const oper_prototype array_of_oper[] =
     {OPERATION_POWER, "^"},
     {OPERATION_LN, "ln"},
     {OPERATION_OPEN_BRACKET, "("},
-    {OPERATION_CLOSE_BRACKET, ")"}
+    {OPERATION_CLOSE_BRACKET, ")"},
+    {OPERATION_END, "$"}
 };
 static const size_t OPER_ARRAY_SIZE = sizeof(array_of_oper)/sizeof(array_of_oper[0]);
 

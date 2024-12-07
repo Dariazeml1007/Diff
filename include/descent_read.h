@@ -3,10 +3,13 @@
 
 #include "tree_expression.h"
 void SyntaxError(int *p);
-Node *GetG(char *s, int *p);
-Node *GetE(char *s, int *p);
-Node *GetT(char *s, int *p);
-Node *GetP(char *s, int *p);
-Node *GetN(char *s, int *p);
+Node *GetG   (Node *root, int *index);
+Node *GetE   (Node *root, int *index);
+Node *GetT   (Node *root, int *index);
+Node *GetP   (Node *root, int *index);
+Node *GetN   (Node *root, int *index);
+Node *GetVar (Node *root, int *index);
+Node *GetOp  (Node *root, int *index);
+Node *GetPow (Node *root, int *index);
 
 #endif

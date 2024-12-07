@@ -13,60 +13,41 @@
 #include "simplify.h"
 #include "descent_read.h"
 #include "tokenizator.h"
-void print_token (Node *node, size_t size);
+#include "dump_lat.h"
 
 int main()
 {
-    char *s = "(1+x)*2.4$";
-    size_t size = strlen(s);
+    const char *s = "sin(0)+cos(0)+x+sin(x)$";
     Node *root = token(s);
+    //print_token(root, strlen(s));
     if (!root)
-        printf ("Problem with token\n");
-    print_token(root, size);
+        assert(0 && "Problem with token\n");
 
-//     struct Node *root = {};
-//
-//     const char *s ="(cos(((7)+(5))+((2)*(x))))";
-//     int index = 0;
-//     Node *result = read_from_string(root, s, &index);
-//     if (!result)
-//         assert(0 && "NULL pointer\n");
-//
-//     draw_and_show(result);
-//
-//      result = optimize(result);
-//      draw_and_show(result);
-//     Node *dif_result = take_derivative(result);
-//     if (!dif_result)
-//         assert(0 && "NULL pointer\n");
-//
-//
-//     draw_and_show(dif_result);
-//     dif_result = optimize(dif_result);
-//
-//     draw_and_show(dif_result);
-//     node_dtor(result);
-//     node_dtor(dif_result);
+    Node *node = process_str(root);
+
+    draw_and_show(node);
+
+    FILE *p_file = fopen ("latex1.txt", "w");
+    if (!p_file)
+        assert(0 && "file not opened");
+
+    dump_to_lat_begin(node, p_file);
+
+    Node *dif_result = take_derivative(node, p_file);
+    if (!dif_result)
+        assert(0 && "NULL pointer\n");
+
+    dif_result = optimize(dif_result);
+    draw_and_show(dif_result);
+    dump_to_lat_end(dif_result, p_file);
+
+    node_dtor(dif_result);
+
+   node_dtor(node);
+
+    if (fclose(p_file) != 0)
+        assert(0 && "not closed");
+
 }
 
 
-void print_token (Node *node, size_t size)
-{
-    for (size_t i = 0; i < size; i++)
-    {
-        if (node[i].value.type == NODE_TYPE_NUM)
-            printf ("%lf", node[i].value.data.number);
-        else if (node[i].value.type == NODE_TYPE_VAR)
-            printf("%s", node[i].value.data.variable);
-        else
-        {
-            for (size_t j = 1; j < OPER_ARRAY_SIZE; j++)
-            {
-                if (node[i].value.data.operation == array_of_oper[j].operation)
-                {
-                    printf("%s", array_of_oper[j].str_operation);
-                }
-            }
-        }
-    }
-}

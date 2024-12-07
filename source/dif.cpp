@@ -13,6 +13,28 @@
 #include "read_expression.h"
 #include "dif.h"
 #include "simplify.h"
+#include "tokenizator.h"
+#include "descent_read.h"
+#include"dump_lat.h"
+
+//#define dump_to_lat();
+
+
+Node *process_str (Node *root)
+{
+    assert(root);
+
+    int index = 0;
+    Node *node = GetG(root, &index);
+    if (!node)
+        printf ("Problem with read\n");
+
+    node = optimize(node);
+    if (!node)
+        assert(0 && "Problem with optimize\n");
+
+    return node;
+}
 
 Node* copy_subtree(Node *node)
 {
@@ -22,19 +44,26 @@ Node* copy_subtree(Node *node)
     return new_node(copy_subtree(node->left), copy_subtree(node->right), node->value);
 }
 
-Node *take_derivative(Node *node)
+Node *take_derivative(Node *node, FILE *p_file)
 {
     assert(node);
+    assert(p_file);
+
+    print_node_to_lat(node, p_file);
 
     switch (node->value.type)
     {
         case NODE_TYPE_NUM:
         {
-            return NUM(0);
+            Node *node_ = NUM(0);
+            print_dif_node_to_lat(node_, p_file);
+            return node_;
         }
         case NODE_TYPE_VAR:
         {
-            return NUM(1);
+            Node *node_ = NUM(1);
+            print_dif_node_to_lat(node_, p_file);
+            return node_;
         }
         case NODE_TYPE_OPER:
         {
@@ -77,6 +106,9 @@ Node *take_derivative(Node *node)
                 {
                     return MUL(DIV(NUM(1), cR), dR);
                 }
+                case OPERATION_OPEN_BRACKET:
+                case OPERATION_CLOSE_BRACKET:
+                case OPERATION_END:
                 case OPERATION_UNKNOWN :
                 default :
                     assert(0 && "not correct operation");
@@ -86,7 +118,6 @@ Node *take_derivative(Node *node)
 
         default :
             assert(0 && "not correct type");
-
     }
     return NULL;
 }

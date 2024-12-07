@@ -47,6 +47,7 @@ void print_tree (Node *node)
     {
         if (node->value.type == NODE_TYPE_NUM)
         {
+
             if (node->value.data.number < 0)
                 printf ("(%lf)", node->value.data.number);
             else
@@ -59,7 +60,8 @@ void print_tree (Node *node)
     {
         printf ("%s", array_of_oper[node->value.data.operation].str_operation);
         if (node->value.data.operation == OPERATION_SIN || node->value.data.operation == OPERATION_COS ||
-            node->value.data.operation == OPERATION_DIV || node->value.data.operation == OPERATION_LN)
+            node->value.data.operation == OPERATION_DIV || node->value.data.operation == OPERATION_LN
+        )
             printf ("(");
     }
 
@@ -73,6 +75,7 @@ void print_tree (Node *node)
     }
 
 }
+
 
 bool is_leaf(Node *node)
 {
@@ -111,9 +114,11 @@ void draw_and_show (Node *node)
 {
     assert(node);
 
-    printf("\nthe tree: ");
+    printf("the tree :");
     print_tree(node);
     printf("\n");
+
     dump(node, "dump.dot");
     system("dot dump.dot -Tpng -o tree.png");
+
 }
